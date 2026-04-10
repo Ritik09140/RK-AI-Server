@@ -131,11 +131,28 @@ if (SpeechRecognition) {
         if (!transcript) return;
 
         // Force stop logic
-        if (isSpeaking && (transcript.includes('chup') || transcript.includes('stop') || transcript.includes('ruk'))) {
+        if (transcript.includes('chup') || transcript.includes('stop') || transcript.includes('ruk') || transcript.includes('shant')) {
             window.speechSynthesis.cancel();
+            if (window.currentAudio) { window.currentAudio.pause(); window.currentAudio.currentTime = 0; }
             isSpeaking = false;
+            stopMouthAnimation();
             setSystemState('IDLE');
+            addMessage("Thik hai boss, chup ho gayi. 🤐", false);
             return;
+        }
+
+        // ECHO PREVENTER: If we are speaking, absolutely ignore all recognition text!
+        if (isSpeaking) return;
+
+        // CLIENT-SIDE OS COMMANDS
+        if (transcript.includes("open youtube") || transcript.includes("youtube kholo") || transcript.includes("youtube chalu")) { window.open("https://youtube.com", "_blank"); addMessage(transcript, true); addMessage("YouTube open kar rahi hu boss! 📺", false); return; }
+        if (transcript.includes("open google") || transcript.includes("google kholo") || transcript.includes("google chalu")) { window.open("https://google.com", "_blank"); addMessage(transcript, true); addMessage("Google open kiya boss! 🌐", false); return; }
+        if (transcript.includes("call") && transcript.includes("karo")) { window.open("tel:"); addMessage(transcript, true); addMessage("Call dialer open kiya boss! 📞", false); return; }
+        if (transcript.includes("camera") && (transcript.includes("open") || transcript.includes("kholo") || transcript.includes("chalu"))) { 
+             const cb = document.getElementById('cam-btn');
+             if(cb) cb.click();
+             addMessage(transcript, true); addMessage("Camera open ho raha hai boss! 📷", false);
+             return;
         }
 
         addMessage(transcript, true);
@@ -279,7 +296,6 @@ function speakText(text) {
     else if (/[\u0900-\u097F]/.test(text)) lang = 'hi';
 
     isSpeaking = true;
-    if (recognition && isRecording) { try { recognition.abort(); } catch(e){} }
     setSystemState('SPEAKING');
     startMouthAnimation();
 
@@ -294,19 +310,19 @@ function speakText(text) {
     })
     .then(blob => {
         const audioUrl = URL.createObjectURL(blob);
-        const audio = new Audio(audioUrl);
-        audio.onended = () => {
+        window.currentAudio = new Audio(audioUrl);
+        window.currentAudio.onended = () => {
             isSpeaking = false;
             stopMouthAnimation();
             setSystemState('IDLE');
             if (micEnabled) restartRecognition();
         };
-        audio.onerror = () => {
+        window.currentAudio.onerror = () => {
             isSpeaking = false;
             stopMouthAnimation();
             setSystemState('IDLE');
         };
-        audio.play().catch(e => {
+        window.currentAudio.play().catch(e => {
             console.error('Audio play error:', e);
             isSpeaking = false;
             stopMouthAnimation();
