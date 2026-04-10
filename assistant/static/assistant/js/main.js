@@ -145,7 +145,7 @@ if (SpeechRecognition) {
     recognition.onend = () => {
         isRecording = false;
         micBtn.classList.remove('active');
-        if (micEnabled && !isSpeaking) {
+        if (micEnabled && !isSpeaking && !isProcessing) {
             setTimeout(() => { try { recognition.start(); } catch(e){} }, 400);
         } else {
             setSystemState('IDLE');
@@ -197,6 +197,9 @@ textInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendBtn.cli
 // --- AI Handler (v4.5 — Smart Quota & Cache) ---
 async function handleCommand(text) {
     if (isProcessing) return;
+    
+    // Explicitly kill mic while thinking/fetching to avoid recording ambient noise
+    if (recognition && isRecording) { try { recognition.abort(); } catch(e){} }
     
     const query = text.toLowerCase().trim();
 
@@ -338,7 +341,7 @@ function splitIntoChunks(str, l) {
 
 function restartRecognition() {
     setTimeout(() => {
-        if (micEnabled && !isSpeaking && !isRecording) {
+        if (micEnabled && !isSpeaking && !isRecording && !isProcessing) {
             try { recognition.start(); } catch(e){}
         }
     }, 600);
@@ -365,8 +368,8 @@ bootScreen.addEventListener('click', () => {
     setTimeout(() => {
         bootScreen.remove();
         appMain.style.display = 'flex';
-        if (micEnabled && recognition) try { recognition.start(); } catch(e){}
-        const greeting = "Namaste Master Ritik. Main RK AI hoon. Maine aapka system aur memory upgrade kar diya hai. Main aaj aapki kaise madad kar sakti hoon?";
+        if (micEnabled && recognition && !isProcessing) try { recognition.start(); } catch(e){}
+        const greeting = "Namaste, Main mere Ritik Boss dwara banayi RK AI hoon, aap mujhe kuchh bhi puch sakte ho.";
         addMessage(greeting, false);
         speakText(greeting);
     }, 800);
