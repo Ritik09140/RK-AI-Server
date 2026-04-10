@@ -488,8 +488,10 @@ async def tts_api(request: Request):
             voice = "mr-IN-AarohiNeural"
         elif lang == "en":
             voice = "en-US-AriaNeural"
-            
-        communicate = edge_tts.Communicate(text, voice, rate="+10%", pitch="+30Hz")
+        # Remove emojis for smoother, more human-like TTS delivery
+        import re
+        clean_tts_text = re.sub(r'[^\w\s\.,\?!\x00-\x7F\u0900-\u097F\u0A80-\u0AFF]', '', text)
+        communicate = edge_tts.Communicate(clean_tts_text, voice, rate="+5%", pitch="+15Hz")
         
         # Edge TTS stream needs to be saved to a buffer
         audio_data = b""
