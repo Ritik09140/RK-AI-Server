@@ -312,10 +312,12 @@ function speakText(text) {
         const audioUrl = URL.createObjectURL(blob);
         window.currentAudio = new Audio(audioUrl);
         window.currentAudio.onended = () => {
-            isSpeaking = false;
-            stopMouthAnimation();
-            setSystemState('IDLE');
-            if (micEnabled) restartRecognition();
+            setTimeout(() => {
+                isSpeaking = false;
+                stopMouthAnimation();
+                setSystemState('IDLE');
+                if (micEnabled) restartRecognition();
+            }, 1200); // Wait for room echo to die down
         };
         window.currentAudio.onerror = () => {
             isSpeaking = false;
