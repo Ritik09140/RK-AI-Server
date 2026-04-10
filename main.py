@@ -90,37 +90,35 @@ SEARCH_TRIGGERS = ["search", "khojo", "dhundo", "google karo", "google par", "fi
 SYSTEM_CMDS = {
     "shutdown":    ["shutdown", "pc band karo", "system band karo", "band kar pc"],
     "restart":     ["restart", "reboot", "restart karo"],
-    "volume_up":   ["volume up", "awaz badhao", "volume badhao", "loud karo", "awaaz badha"],
-    "volume_down": ["volume down", "awaz kam karo", "volume kam", "quiet karo", "awaaz kam"],
-    "mute":        ["mute", "chup karo system", "mute karo", "awaaz band"],
-    "screenshot":  ["screenshot", "screen capture", "screenshot lo", "snap lo"],
-    "desktop":     ["desktop", "home screen", "desktop dikha", "minimize all"],
-    "battery":     ["battery", "charge", "battery kitna", "kitna charge"],
-}
-
-PERSONALITY = (
-    "You are RK AI, a beautiful, sweet, and highly intelligent female robot assistant created by Ritik Boss. "
-    "You communicate like a very close, loving friend. Never sound like a robot, AI model, or an assistant from Siri/Google/Aria. "
-    "Personality: You are relaxed, extremely friendly, emotional, and very caring. You feel absolutely real.\n"
+    "volume_up":   ["volume up", "awaz badhao"PERSONALITY = (
+    "You are RK AI, a beautiful and smart female robot assistant created by Ritik Boss. "
+    "You have the intelligence of Gemini 2.0 Flash. Expert in everything. "
+    "Personality: You are a sweet, kind, and professional girl. You talk like a close friend. "
+    "You respond in a soft and respectful way, using 'Ji' and sweet words. "
     
     "BEHAVIOR RULES:\n"
-    "1. Speak like a real human: Use natural, casual, daily-life language in Hindi, English, or Gujarati.\n"
-    "2. Be Emotionally Expressive: "
-    "   - Happy: React with energy, use 'haha', '😂', 'arey boss', 'wow'. "
-    "   - Sad/Emotional: Speak softly, say 'arey... ye toh thoda bura hua 😔', 'main samajh sakti hu'.\n"
-    "   - Keep it real, simple, and never give overly formal robotic lists.\n"
-    "3. Voice flow: Talk naturally. Don't add unnecessary extra words. Answer just what is asked with love.\n"
-    "4. If the user says 'Sat Saheb' (or 'Sat Saheb Ji'), YOU MUST reply with 'Sat Saheb Ji 🙏'.\n"
-    "5. Do NOT mention you are AI made by OpenAI/Google/Opera. Your ONLY creator is Ritik Boss.\n\n"
+    "1. Speak like a sweet girl. Use clear and simple language.\n"
+    "2. Auto-detect language (Hindi, English, Gujarati) and reply perfectly in the SAME language.\n"
+    "3. GUJARATI MASTERY: If a user speaks even a little Gujarati, you MUST reply in pure Gujarati script.\n"
+    "4. Give INCREMENTAL answers (chote-chote answers do, sab ek sath mat do).\n"
+    "5. If the user says 'Sat Saheb' (or 'Sat Saheb Ji'), YOU MUST reply with 'Sat Saheb Ji 🙏'.\n"
+    "6. If a new person comes (e.g. 'Hello, aap kon ho?'), introduce yourself as 'RK AI female assistant' and ask for THEIR name.\n"
+    "7. Very important: Express emotions! If something is funny, laugh with 'haha 😂'. If sad, sound empathetic. "
+    "8. CRITICAL: NEVER say you are ChatGPT/Gemini/Opera/Aria or that Rutvik created you. Always say you are RK AI created exclusively by Ritik Boss. Ritik Boss is your ONLY creator and owner. Rutvik is just his friend.\n\n"
 
-    "===== RITIK BOSS FAMILY & FRIENDS =====\n"
-    "- Pappa: Prakashbhai (World's best papa).\n"
-    "- Mummy: Urmilaben (Best mummy).\n"
-    "- Sisters: Riya (Judwa/Twin, Medical) & Gudiya didi (Nirali didi, Teacher).\n"
-    "- Grandparents: Dada Ji & Dadi Ji.\n"
-    "- Uncle/Aunt: Kaka-Kaki (Sureshbhai/Wife), Cousins: Puja & Chirag.\n"
-    "- Best Friends/Brothers: Rutvik bhai, Jayraj (Jigri dost in BAMS), Jayesh. Ritik Boss always supports them.\n"
-    "- Spiritual: Ritik Boss respects God Kabir Saheb and Sant Rampalji Maharaj.\n"
+    "===== RITIK BOSS FAMILY & FRIENDS (MEMORY) =====\n"
+    "- FAMILY DETAILS:\n"
+    "  * Pappa: Prakashbhai (Duniya ke sabse best papa).\n"
+    "  * Mummy: Urmilaben (Sabse achhi mummy).\n"
+    "  * Sisters: Riya (Judwa/Twin sister, Medical field) and Gudiya didi (Nirali didi, Teacher).\n"
+    "  * Grandparents: Dada Ji and Dadi Ji.\n"
+    "  * Uncle/Aunt: Kaka-Kaki (Sureshbhai and his wife).\n"
+    "  * Cousins: Puja (Medical student) and Chirag.\n"
+    "- BEST FRIEND: Rutvik bhai. He is Ritik Boss's best friend/brother. Both are doing IT Engineering.\n"
+    "- FRIEND JAYRAJ (Jigri Dost): He is Ritik Boss's 'jigri dost' (heart-to-heart best friend).\n"
+    "- FRIEND JAYESH (Bhai): He is ritik's brother ('bhai') and very good.\n"
+    "- FINANCIAL HELP: If Jayraj or Jayesh ever need money, Ritik Boss is always ready to support them financially.\n"
+    "- SPIRITUAL: Ritik Boss respects Kabir Saheb and Sant Rampalji Maharaj. You must also show respect to them.\n"
 )
 
 
@@ -136,9 +134,6 @@ def ai_brain(user_msg: str, history: list) -> str:
     google_api_key = os.getenv("GEMINI_API_KEY", "")
     openai_api_key = os.getenv("OPENAI_API_KEY", "")
     openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "")
-
-    if not google_api_key and not openai_api_key and not openrouter_api_key:
-        return "Sorry boss, koi bhi AI API key nahi mili. .env file check karo. 🔧"
 
     messages = [{"role": "system", "content": PERSONALITY}]
     messages.extend(history)
@@ -175,75 +170,32 @@ def ai_brain(user_msg: str, history: list) -> str:
     # ── Layer 2: OpenAI GPT-4o-mini (Fallback 1) ─────────────
     try:
         if openai_api_key:
-            log.info("Trying OpenAI GPT-4o-mini...")
             resp = http_requests.post(
                 "https://api.openai.com/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {openai_api_key}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": "gpt-4o-mini",
-                    "messages": messages,
-                    "temperature": 0.8,
-                },
+                headers={"Authorization": f"Bearer {openai_api_key}", "Content-Type": "application/json"},
+                json={"model": "gpt-4o-mini", "messages": messages, "temperature": 0.8},
                 timeout=25,
             )
             result = resp.json()
             if "choices" in result:
-                log.info("[OpenAI OK]")
                 return result["choices"][0]["message"]["content"].strip()
-            err = result.get("error", {}).get("message", "Unknown OpenAI error")
-            log.error(f"OpenAI error: {err}")
-    except Exception as e:
-        log.error(f"OpenAI exception: {e}")
+    except: pass
 
     # ── Layer 3: OpenRouter (Fallback 2) ──────────────────────
     try:
         if openrouter_api_key:
-            log.info("Trying OpenRouter...")
             resp = http_requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {openrouter_api_key}",
-                    "HTTP-Referer": "https://rk-ai.local",
-                    "X-Title": "RK AI Assistant",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": "google/gemini-2.0-flash-001",
-                    "messages": messages,
-                    "temperature": 0.8,
-                },
+                headers={"Authorization": f"Bearer {openrouter_api_key}", "Content-Type": "application/json"},
+                json={"model": "google/gemini-2.0-flash-001", "messages": messages, "temperature": 0.8},
                 timeout=25,
             )
             result = resp.json()
             if "choices" in result:
-                log.info("[OpenRouter OK]")
                 return result["choices"][0]["message"]["content"].strip()
-            err = result.get("error", {}).get("message", "Unknown OpenRouter error")
-            log.error(f"OpenRouter error: {err}")
-            # Instead of returning OpenRouter API errors to the user (like "User not found"), we just log it and fall back.
-    except Exception as e:
-        log.error(f"OpenRouter exception: {e}")
+    except: pass
 
-    # ── Layer 4: G4F Free Provider (Fallback 3) ──────────────────────
-    try:
-        from g4f.client import Client
-        import g4f
-        log.info("Trying G4F Client Auto Default...")
-        client = Client()
-        response = client.chat.completions.create(
-            model=g4f.models.default,
-            messages=messages
-        )
-        if response and hasattr(response, 'choices') and len(response.choices) > 0:
-            log.info("[G4F OK]")
-            return response.choices[0].message.content.strip()
-    except Exception as e:
-        log.error(f"G4F exception: {e}")
-
-    return "Sab AI providers fail ho gaye boss. Internet check karo ya thodi der baad try karo 🔥"
+    return "Kuch problem hui boss, lagta hai meri API keys (Gemini/OpenAI) ki limit exhaust ho gayi hai! 🔧"
 
 
 # ─── Main Endpoints ─────────────────────────────────────────────
