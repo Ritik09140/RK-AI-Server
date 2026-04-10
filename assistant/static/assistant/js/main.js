@@ -276,6 +276,7 @@ function speakText(text) {
     else if (/[\u0900-\u097F]/.test(text)) lang = 'hi';
 
     isSpeaking = true;
+    if (recognition && isRecording) { try { recognition.abort(); } catch(e){} }
     setSystemState('SPEAKING');
     startMouthAnimation();
 
@@ -370,6 +371,24 @@ bootScreen.addEventListener('click', () => {
         speakText(greeting);
     }, 800);
 });
+
+// --- File & Camera Handlers ---
+const fileBtn = document.getElementById('file-btn');
+const camBtn = document.getElementById('cam-btn');
+const fileInput = document.getElementById('file-input');
+
+if (fileBtn) fileBtn.addEventListener('click', () => { fileInput.removeAttribute('capture'); fileInput.accept='image/*,.pdf,.txt,.doc'; fileInput.click(); });
+if (camBtn) camBtn.addEventListener('click', () => { fileInput.accept='image/*'; fileInput.setAttribute('capture', 'environment'); fileInput.click(); });
+
+if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            const fileName = e.target.files[0].name;
+            addMessage(`File attached: ${fileName}`, true);
+            handleCommand(`Maine ek file bheji hai: ${fileName}. Iske bare me summary do.`);
+        }
+    });
+}
 
 // Warm up voices
 window.speechSynthesis.getVoices();

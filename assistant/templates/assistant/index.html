@@ -724,6 +724,15 @@
         .mic-btn.muted { color: rgba(255,100,100,0.6); border-color: rgba(255,100,100,0.3); }
         @keyframes micPulse { 0%, 100% { box-shadow: 0 0 10px rgba(255,0,144,0.3); } 50% { box-shadow: 0 0 25px rgba(255,0,144,0.7); } }
 
+        .attach-btn {
+            width: 46px; height: 46px; border-radius: 12px;
+            background: rgba(0,245,255,0.08); border: 1px solid rgba(0,245,255,0.2);
+            color: var(--c-cyan); font-size: 1.1rem;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .attach-btn:hover { background: rgba(0,245,255,0.15); box-shadow: 0 0 15px rgba(0,245,255,0.2); }
+
         .send-btn {
             width: 46px; height: 46px; border-radius: 12px;
             background: linear-gradient(135deg, var(--c-cyan), var(--c-purple));
@@ -924,6 +933,9 @@
             <!-- Input Area -->
             <div class="input-area">
                 <div class="input-row">
+                    <button class="attach-btn" id="cam-btn" title="Take a Photo"><i class="fa-solid fa-camera"></i></button>
+                    <button class="attach-btn" id="file-btn" title="Upload Document"><i class="fa-solid fa-paperclip"></i></button>
+                    <input type="file" id="file-input" style="display: none;" accept="image/*,.pdf,.txt,.doc" />
                     <button class="mic-btn" id="mic-btn" title="Toggle Mic">
                         <i class="fa-solid fa-microphone" id="mic-icon"></i>
                     </button>

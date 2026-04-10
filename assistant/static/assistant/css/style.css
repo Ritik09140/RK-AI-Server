@@ -387,16 +387,25 @@ body {
 
 .mic-label { font-size: 0.7rem; color: var(--text-secondary); letter-spacing: 1px; text-transform: uppercase; }
 
-/* Responsive */
+/* Responsive Mobile First */
 @media (max-width: 1100px) {
-    body { overflow-y: auto; }
-    .app-container { height: auto; min-height: 100vh; overflow-y: auto; }
-    .workspace { flex-direction: column; height: auto; }
-    .chat-panel { width: 100%; height: 500px; }
-    .ai-orb-container { width: 280px; height: 280px; }
-    .ring-1 { width: 250px; height: 250px; }
-    .ring-2 { width: 200px; height: 200px; }
-    .ring-3 { width: 155px; height: 155px; }
-    .orb-core { width: 100px; height: 100px; }
-    .visualization-container { height: 400px; }
+    body { overflow-y: auto; overflow-x: hidden; }
+    .app-container { height: auto; min-height: 100vh; overflow-y: auto; padding: 10px; gap: 10px; }
+    .workspace { flex-direction: column; height: auto; gap: 1rem; }
+    .chat-panel { width: 100%; height: 60vh; min-height: 400px; padding: 1rem; }
+    .ai-orb-container { width: 220px; height: 220px; }
+    .ring-1 { width: 200px; height: 200px; }
+    .ring-2 { width: 160px; height: 160px; }
+    .ring-3 { width: 120px; height: 120px; }
+    .orb-core { width: 80px; height: 80px; }
+    .visualization-container { height: 300px; }
+    .header { padding: 0 1rem; height: 60px; flex-wrap: wrap; }
+    .brand-name { font-size: 1.2rem; }
+    .status-indicator { display: none; }
+    
+    /* Input Area Mobile */
+    .input-row { flex-wrap: nowrap; gap: 6px; }
+    .text-input { padding: 10px; font-size: 0.9rem; }
+    .attach-btn, .mic-btn, .send-btn { width: 38px; height: 38px; font-size: 0.85rem; border-radius: 8px; flex-shrink: 0; }
+    .input-meta { flex-direction: column; gap: 5px; text-align: center; margin-top: 10px; }
 }
