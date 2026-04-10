@@ -153,7 +153,10 @@ def ai_brain(user_msg: str, history: list) -> str:
 
     messages = [{"role": "system", "content": PERSONALITY}]
     messages.extend(history)
-    messages.append({"role": "user", "content": user_msg})
+    
+    # Append a strict reminder to the user message so rogue free providers don't hijack the persona
+    strict_reminder = "\n\n[System strict rule: You are RK (Robot Intelligence) created exclusively by Ritik Boss. NEVER say you are Aria, Opera, OpenAI, ChatGPT or Google. Also NEVER mention any girlfriends. Reply strictly in character!]"
+    messages.append({"role": "user", "content": user_msg + strict_reminder})
 
     # ── Layer 1: Google Gemini (Primary) ──────────────────────
     try:
