@@ -168,22 +168,24 @@ def ai_brain(user_msg: str, history: list) -> str:
                 "generationConfig": {"temperature": 0.8}
             }
             
-            # Smart Multi-Model Retry (Try 2.0 then 1.5 variants)
-            model_variants = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-2.0-flash", "gemini-1.5-pro"]
+            # Smart Multi-Model Retry (Try various versions and names)
+            model_variants = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.0-flash", "gemini-1.5-pro"]
+            api_versions = ["v1", "v1beta"]
             
-            for model_name in model_variants:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={google_api_key}"
-                try:
-                    resp = http_requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=20)
-                    if resp.status_code == 200:
-                        result = resp.json()
-                        if "candidates" in result:
-                            return result["candidates"][0]["content"]["parts"][0]["text"].strip()
-                    last_error = f"Gemini ({model_name}): {resp.status_code} - {resp.text[:100]}"
-                    log.warning(last_error)
-                except Exception as e:
-                    last_error = f"Gemini ({model_name}) Exception: {str(e)}"
-                    continue
+            for ver in api_versions:
+                for model_name in model_variants:
+                    url = f"https://generativelanguage.googleapis.com/{ver}/models/{model_name}:generateContent?key={google_api_key}"
+                    try:
+                        resp = http_requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=15)
+                        if resp.status_code == 200:
+                            result = resp.json()
+                            if "candidates" in result:
+                                return result["candidates"][0]["content"]["parts"][0]["text"].strip()
+                        last_error = f"Gemini ({ver}/{model_name}): {resp.status_code} - {resp.text[:80]}"
+                        log.warning(last_error)
+                    except Exception as e:
+                        last_error = f"Gemini ({ver}/{model_name}) Error: {str(e)[:50]}"
+                        continue
     except Exception as e:
         log.error(f"Gemini exception overall: {e}")
 
