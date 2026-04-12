@@ -8,7 +8,8 @@ load_dotenv()
 
 class RKBrain:
     def __init__(self, memory_file="memory.json"):
-        self.api_key = os.getenv("OPENROUTER_API_KEY")
+        # Fallback to the provided key if Render env is missing
+        self.api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCbpgfyJAGZKUMVgklcNcrN9NwUy7GwyNE")
         self.memory_file = memory_file
         self.personality_prompt = (
             "You are RK, a beautiful and smart female robot assistant with a beating heart, created by Ritik Boss. "

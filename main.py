@@ -138,7 +138,8 @@ def normalize(text: str) -> str:
 import requests as http_requests
 
 def ai_brain(user_msg: str, history: list) -> str:
-    google_api_key = os.getenv("GEMINI_API_KEY", "")
+    # Fallback to the provided key if Render env is missing
+    google_api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCbpgfyJAGZKUMVgklcNcrN9NwUy7GwyNE")
     openai_api_key = os.getenv("OPENAI_API_KEY", "")
     openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "")
 
