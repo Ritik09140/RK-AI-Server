@@ -15,14 +15,13 @@
 
         :root {
             --c-cyan: #00f5ff;
-            --c-pink: #ff0090;
-            --c-green: #00ff88;
-            --c-purple: #8b00ff;
-            --c-gold: #ffd700;
-            --c-bg: #050a15;
-            --c-bg2: #0a1628;
-            --c-panel: rgba(10,25,50,0.85);
-            --c-border: rgba(0,245,255,0.2);
+            --c-blue: #0088ff;
+            --c-gold: #ffcc00;
+            --c-silver: #c0c0c0;
+            --c-bg: #030812;
+            --c-bg2: #081225;
+            --c-panel: rgba(5,15,35,0.9);
+            --c-border: rgba(0,136,255,0.3);
             --font-main: 'Rajdhani', sans-serif;
             --font-head: 'Orbitron', monospace;
             --font-code: 'JetBrains Mono', monospace;
@@ -310,23 +309,21 @@
 
         /* Robot Head */
         .robot-head {
-            width: 130px; height: 110px;
-            background: linear-gradient(145deg, #1a3060, #0d1e3a);
-            border: 2px solid rgba(0,245,255,0.6);
-            border-radius: 20px;
+            width: 140px; height: 115px;
+            background: linear-gradient(145deg, #102040, #050815);
+            border: 2px solid var(--c-blue);
+            border-radius: 12px;
             position: relative;
-            box-shadow:
-                0 0 30px rgba(0,245,255,0.3),
-                inset 0 0 20px rgba(0,100,200,0.1),
-                0 15px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(0,136,255,0.3), inset 0 0 15px rgba(0,0,0,0.5);
             margin: 0 auto;
             overflow: hidden;
         }
+        /* Top "Cap/Hair" part for male look */
         .robot-head::before {
             content: '';
-            position: absolute; top: 0; left: 0; right: 0; height: 40%;
-            background: linear-gradient(to bottom, rgba(0,245,255,0.08), transparent);
-            border-radius: 18px 18px 0 0;
+            position: absolute; top: 0; left: 0; right: 0; height: 25px;
+            background: rgba(0,0,0,0.4);
+            border-bottom: 2px solid var(--c-blue);
         }
         /* Edge glow lines on head */
         .robot-head::after {
@@ -443,21 +440,32 @@
             margin: 0 auto;
         }
 
-        /* Robot Body */
+        /* Robot Body (MALE BROADER) */
         .robot-body {
-            width: 140px; height: 110px;
-            background: linear-gradient(145deg, #1a3060, #0d1e3a, #0a1525);
-            border: 2px solid rgba(0,245,255,0.5);
-            border-radius: 16px;
+            width: 160px; height: 125px;
+            background: linear-gradient(145deg, #0a1525, #1a3060);
+            border: 2px solid var(--c-blue);
+            border-radius: 8px;
             margin: 0 auto;
             position: relative;
-            box-shadow: 0 0 25px rgba(0,245,255,0.2), 0 20px 50px rgba(0,0,0,0.5);
-            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            overflow: visible; /* Let arms be prominent */
         }
-        .robot-body::before {
+        /* "Clothes/Armor" Look */
+        .robot-body::after {
             content: '';
-            position: absolute; top: 0; left: 0; right: 0; height: 30%;
-            background: linear-gradient(to bottom, rgba(0,245,255,0.06), transparent);
+            position: absolute; inset: 5px;
+            border: 1px solid rgba(255,255,255,0.05);
+            background: repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(0,136,255,0.03) 4px, rgba(0,136,255,0.03) 5px);
+            border-radius: 4px;
+        }
+        /* Tie/Center piece for male secretary look */
+        .robot-body .tie {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 30px; height: 60%;
+            background: linear-gradient(to bottom, var(--c-blue), transparent);
+            clip-path: polygon(0 0, 100% 0, 80% 100%, 50% 80%, 20% 100%);
+            z-index: 2; opacity: 0.6;
         }
         /* Chest panel */
         .chest-panel {
@@ -1053,21 +1061,22 @@
 
                 <!-- Body -->
                 <div class="robot-body" style="position:relative;">
+                    <div class="tie"></div>
                     <!-- Detailed Arms -->
-                    <div class="robot-arms">
+                    <div class="robot-arms" style="left:-40px; right:-40px; width: calc(100% + 80px);">
                         <div class="robot-arm left">
-                            <div class="arm-shoulder"></div>
-                            <div class="arm-upper"></div>
+                            <div class="arm-shoulder" style="width:25px; height:25px;"></div>
+                            <div class="arm-upper" style="width:18px;"></div>
                             <div class="arm-elbow"></div>
-                            <div class="arm-lower"></div>
-                            <div class="arm-hand"></div>
+                            <div class="arm-lower" style="width:16px;"></div>
+                            <div class="arm-hand" style="width:24px; height:20px;"></div>
                         </div>
                         <div class="robot-arm right">
-                            <div class="arm-shoulder"></div>
-                            <div class="arm-upper"></div>
+                            <div class="arm-shoulder" style="width:25px; height:25px;"></div>
+                            <div class="arm-upper" style="width:18px;"></div>
                             <div class="arm-elbow"></div>
-                            <div class="arm-lower"></div>
-                            <div class="arm-hand"></div>
+                            <div class="arm-lower" style="width:16px;"></div>
+                            <div class="arm-hand" style="width:24px; height:20px;"></div>
                         </div>
                     </div>
                     
@@ -1081,19 +1090,19 @@
                     </div>
                 </div>
 
-                <!-- Detailed Legs -->
-                <div class="robot-legs">
+                <!-- Detailed Legs (STRONGER) -->
+                <div class="robot-legs" style="gap: 50px;">
                     <div class="robot-leg left">
-                        <div class="leg-thigh"></div>
+                        <div class="leg-thigh" style="width:30px;"></div>
                         <div class="leg-knee"></div>
-                        <div class="leg-calf"></div>
-                        <div class="leg-foot"></div>
+                        <div class="leg-calf" style="width:26px;"></div>
+                        <div class="leg-foot" style="width:40px;"></div>
                     </div>
                     <div class="robot-leg right">
-                        <div class="leg-thigh"></div>
+                        <div class="leg-thigh" style="width:30px;"></div>
                         <div class="leg-knee"></div>
-                        <div class="leg-calf"></div>
-                        <div class="leg-foot"></div>
+                        <div class="leg-calf" style="width:26px;"></div>
+                        <div class="leg-foot" style="width:40px;"></div>
                     </div>
                 </div>
             </div>
@@ -1118,7 +1127,7 @@
                 <div class="msg ai">
                     <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
                     <div class="msg-bubble">
-                        Namaste! Mera naam RK hai, mujhe Ritik Boss ne banaya hai. Main aapki madad ke liye hamesha taiyyar hoon! 🤖
+                        Namaste mere Ritik Boss 😊... Main aapki RK Male AI Assistant hoon! Aapka swagat hai. Main aapki har command ke liye taiyyar hoon... bataiye boss aaj kya karna hai?
                         <span class="msg-time">System Boot</span>
                     </div>
                 </div>

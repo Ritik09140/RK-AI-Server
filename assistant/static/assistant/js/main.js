@@ -162,7 +162,17 @@ if (SpeechRecognition) {
         const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
         if (!transcript) return;
 
-        // Force stop logic
+        // INTERRUPT LOGIC: If many words are detected while speaking, STOP current speech
+        if (isSpeaking && transcript.length > 5) {
+            console.log("Interrupting for new command...");
+            window.speechSynthesis.cancel();
+            if (window.currentAudio) { window.currentAudio.pause(); window.currentAudio.currentTime = 0; }
+            isSpeaking = false;
+            stopMouthAnimation();
+            setSystemState('IDLE');
+        }
+
+        // Force stop logic explicitly
         if (transcript.includes('chup') || transcript.includes('stop') || transcript.includes('ruk') || transcript.includes('shant')) {
             window.speechSynthesis.cancel();
             if (window.currentAudio) { window.currentAudio.pause(); window.currentAudio.currentTime = 0; }
@@ -170,11 +180,11 @@ if (SpeechRecognition) {
             isProcessing = false;
             stopMouthAnimation();
             setSystemState('IDLE');
-            addMessage("Thik hai boss, chup ho gayi. 🤐", false);
+            addMessage("Thik hai boss, main chup hoon. 🤫", false);
             return;
         }
 
-        // ECHO PREVENTER: If we are speaking, absolutely ignore all recognition text!
+        // Ignore if we are still speaking (preventing echo loop)
         if (isSpeaking) return;
 
         // CLIENT-SIDE OS COMMANDS
@@ -424,7 +434,7 @@ bootScreen.addEventListener('click', () => {
         bootScreen.remove();
         appMain.style.display = 'flex';
         if (micEnabled && recognition && !isProcessing) try { recognition.start(); } catch(e){}
-        const greeting = "Namaste mere Ritik Boss 😊... Main aapki RK Female AI Assistant hoon! Aapka swagat hai. Main hamesha aapki madad ke liye yahan hoon... bataiye aaj kya karna hai?";
+        const greeting = "Namaste mere Ritik Boss 😊... Main aapki RK Male AI Assistant hoon! Aapka swagat hai. Aaj hum kya dhamaka karenge, Boss?";
         addMessage(greeting, false);
         speakText(greeting);
     }, 800);
