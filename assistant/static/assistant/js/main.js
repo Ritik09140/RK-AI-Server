@@ -36,7 +36,9 @@ const STATES = {
     IDLE: { cls: '', label: '● READY', status: 'SYSTEM READY', color: '#00f5ff' },
     LISTENING: { cls: 'listening', label: '● LISTENING...', status: 'MIC ACTIVE', color: '#ff0090' },
     THINKING: { cls: 'thinking', label: '● PROCESSING...', status: 'AI PROCESSING', color: '#8b00ff' },
-    SPEAKING: { cls: 'speaking', label: '● SPEAKING...', status: 'VOICE OUTPUT', color: '#00ff88' }
+    SPEAKING: { cls: 'speaking', label: '● SPEAKING...', status: 'VOICE OUTPUT', color: '#00ff88' },
+    SHY: { cls: 'shy', label: '● SHY 😊', status: 'EMOTIONAL', color: '#ff0090' },
+    ANGRY: { cls: 'angry', label: '● ANGRY 💢', status: 'DEFENSIVE', color: '#ff0000' }
 };
 
 function setSystemState(name) {
@@ -44,7 +46,7 @@ function setSystemState(name) {
     if (!s) return;
     
     // Reset emotional classes
-    robotUnit.classList.remove('listening', 'thinking', 'speaking', 'joy', 'surprise');
+    robotUnit.classList.remove('listening', 'thinking', 'speaking', 'joy', 'surprise', 'love', 'shy', 'angry');
     if (s.cls) robotUnit.classList.add(s.cls);
 
     robotState.textContent = s.label;
@@ -78,20 +80,30 @@ document.querySelectorAll('.lang-pill').forEach(btn => {
 
 function triggerReaction(text) {
     const t = text.toLowerCase();
-    robotUnit.classList.remove('joy', 'surprise', 'love');
+    robotUnit.classList.remove('joy', 'surprise', 'love', 'shy', 'angry');
     
-    // Love/Affection keywords (AI responses or User input)
-    if (t.includes('pyaar') || t.includes('love') || t.includes('heart') || t.includes('dil') || t.includes('❤️') || t.includes('boss')) {
+    // Shy keywords
+    if (t.includes('sharam') || t.includes('sharma') || t.includes('sundar') || t.includes('pyaari') || t.includes('beautiful') || t.includes('blush')) {
+        robotUnit.classList.add('shy');
+        setTimeout(() => robotUnit.classList.remove('shy'), 4000);
+    }
+    // Angry keywords
+    else if (t.includes('bad') || t.includes('gussa') || t.includes('angry') || t.includes('irritate') || t.includes('hate')) {
+        robotUnit.classList.add('angry');
+        setTimeout(() => robotUnit.classList.remove('angry'), 3500);
+    }
+    // Love/Affection keywords
+    else if (t.includes('pyaar') || t.includes('love') || t.includes('heart') || t.includes('dil') || t.includes('❤️') || t.includes('boss')) {
         robotUnit.classList.add('love');
         setTimeout(() => robotUnit.classList.remove('love'), 5000);
     }
     // Joyful/Happy keywords
-    else if (t.includes('haha') || t.includes('😊') || t.includes('😄') || t.includes('achha') || t.includes('swagat') || t.includes('shukriya') || t.includes('good')) {
+    else if (t.includes('haha') || t.includes('😊') || t.includes('😄') || t.includes('achha') || t.includes('swagat')) {
         robotUnit.classList.add('joy');
         setTimeout(() => robotUnit.classList.remove('joy'), 4000);
     } 
-    // Surprised/Questioning keywords
-    else if (t.includes('oh!') || t.includes('arey') || t.includes('vau') || t.includes('shock') || t.includes('!') || t.includes('sachi') || t.includes('kya?')) {
+    // Surprised keywords
+    else if (t.includes('oh!') || t.includes('arey') || t.includes('vau') || t.includes('!') || t.includes('kya?')) {
         robotUnit.classList.add('surprise');
         setTimeout(() => robotUnit.classList.remove('surprise'), 2500);
     }
@@ -434,7 +446,7 @@ bootScreen.addEventListener('click', () => {
         bootScreen.remove();
         appMain.style.display = 'flex';
         if (micEnabled && recognition && !isProcessing) try { recognition.start(); } catch(e){}
-        const greeting = "Namaste mere Ritik Boss 😊... Main aapki RK Male AI Assistant hoon! Aapka swagat hai. Aaj hum kya dhamaka karenge, Boss?";
+        const greeting = "Namaste mere Ritik Boss 😊... Main aapki RK Female Assistant hoon! Aapka swagat hai. Aaj hum kya dhamaka karenge, Boss?";
         addMessage(greeting, false);
         speakText(greeting);
     }, 800);
