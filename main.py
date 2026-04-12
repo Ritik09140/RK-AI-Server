@@ -139,7 +139,7 @@ import requests as http_requests
 
 def ai_brain(user_msg: str, history: list) -> str:
     # Fallback to the provided key if Render env is missing
-    google_api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCbpgfyJAGZKUMVgklcNcrN9NwUy7GwyNE")
+    google_api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCav4UnAP1s2AJKIvOwx0W-Lx5O3MjEIvA")
     openai_api_key = os.getenv("OPENAI_API_KEY", "")
     openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "")
 
@@ -154,8 +154,7 @@ def ai_brain(user_msg: str, history: list) -> str:
             gemini_history = []
             for m in messages:
                 role = "user" if m["role"] == "user" else "model"
-                if m["role"] == "system":
-                    continue
+                if m["role"] == "system": continue
                 gemini_history.append({"role": role, "parts": [{"text": m["content"]}]})
             
             payload = {
@@ -163,16 +162,21 @@ def ai_brain(user_msg: str, history: list) -> str:
                 "contents": gemini_history,
                 "generationConfig": {"temperature": 0.8}
             }
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={google_api_key}"
-            resp = http_requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=25)
-            if resp.status_code == 429:
-                log.warning("Gemini 429 Rate Limit. Falling back to OpenAI.")
-            else:
-                result = resp.json()
-                if "candidates" in result:
-                    return result["candidates"][0]["content"]["parts"][0]["text"].strip()
-                err = result.get("error", {}).get("message", "Unknown Gemini error")
-                log.error(f"Gemini API error: {err}")
+            
+            # Smart Multi-Model Retry (Try 2.0 then 1.5 variants)
+            model_variants = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"]
+            
+            for model_name in model_variants:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={google_api_key}"
+                try:
+                    resp = http_requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=25)
+                    if resp.status_code == 200:
+                        result = resp.json()
+                        if "candidates" in result:
+                            return result["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    log.warning(f"Model {model_name} failed (Status {resp.status_code}). Trying next...")
+                except:
+                    continue
     except Exception as e:
         log.error(f"Gemini exception: {e}")
 
