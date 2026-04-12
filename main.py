@@ -138,10 +138,13 @@ def normalize(text: str) -> str:
 import requests as http_requests
 
 def ai_brain(user_msg: str, history: list) -> str:
-    # Fallback to the provided key if Render env is missing
-    google_api_key = os.getenv("GEMINI_API_KEY", "AIzaSyCav4UnAP1s2AJKIvOwx0W-Lx5O3MjEIvA")
-    openai_api_key = os.getenv("OPENAI_API_KEY", "")
-    openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "")
+    # Explicit check: If Render env is missing or empty, use our hardcoded backup
+    google_api_key = os.getenv("GEMINI_API_KEY")
+    if not google_api_key or len(google_api_key) < 10:
+        google_api_key = "AIzaSyCav4UnAP1s2AJKIvOwx0W-Lx5O3MjEIvA" 
+    
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
 
     # Increased memory context
     messages = [{"role": "system", "content": PERSONALITY}]
