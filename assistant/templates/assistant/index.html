@@ -342,7 +342,23 @@
             justify-content: center;
             padding-top: 26px;
             padding-left: 5px;
+            position: relative;
         }
+        /* Blushing Cheeks (New) */
+        .cheek {
+            position: absolute;
+            width: 15px; height: 8px;
+            background: #ff0090;
+            border-radius: 50%;
+            top: 55px;
+            opacity: 0;
+            filter: blur(4px);
+            transition: opacity 0.4s ease;
+        }
+        .cheek.left { left: 15px; }
+        .cheek.right { right: 15px; }
+        .robot-unit.love .cheek { opacity: 0.6; }
+
         .robot-eye {
             width: 28px; height: 18px;
             background: var(--c-cyan);
@@ -473,45 +489,88 @@
             50% { transform: scale(1.2); opacity: 1; }
         }
 
-        /* Arms */
+        /* Detailed Arms */
         .robot-arms {
             display: flex; justify-content: space-between;
-            position: absolute; top: 15px; left: -20px; right: -20px;
+            position: absolute; top: 10px; left: -25px; right: -25px;
+            width: calc(100% + 50px);
         }
         .robot-arm {
-            width: 18px; height: 80px;
+            display: flex; flex-direction: column; align-items: center;
+            position: relative;
+            transform-origin: top center;
+        }
+        .arm-shoulder {
+            width: 20px; height: 20px; border-radius: 50%;
+            background: var(--c-bg2); border: 2px solid var(--c-cyan);
+            box-shadow: 0 0 10px var(--c-cyan);
+            z-index: 2;
+        }
+        .arm-upper {
+            width: 14px; height: 35px;
             background: linear-gradient(to bottom, #1a3060, #0d1e3a);
-            border: 1px solid rgba(0,245,255,0.35);
-            border-radius: 8px;
+            border: 1px solid rgba(0,245,255,0.4);
+            border-radius: 4px; margin-top: -5px;
+        }
+        .arm-elbow {
+            width: 12px; height: 12px; border-radius: 50%;
+            background: var(--c-bg2); border: 1px solid var(--c-cyan);
+            margin-top: -4px; margin-bottom: -4px; z-index: 1;
+        }
+        .arm-lower {
+            width: 12px; height: 30px;
+            background: linear-gradient(to bottom, #1a3060, #0d1e3a);
+            border: 1px solid rgba(0,245,255,0.4);
+            border-radius: 4px;
+        }
+        .arm-hand {
+            width: 20px; height: 16px;
+            background: var(--c-cyan); border-radius: 4px 4px 8px 8px;
+            box-shadow: 0 0 15px var(--c-cyan), 0 0 30px rgba(140,0,255,0.4);
+            margin-top: -2px;
             position: relative;
         }
-        .arm-joint {
-            width: 18px; height: 18px; border-radius: 50%;
-            background: var(--c-bg2);
-            border: 1px solid rgba(0,245,255,0.4);
-            position: absolute; top: -8px; left: 0;
+        /* Adding "fingers" representation */
+        .arm-hand::after {
+            content: '';
+            position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+            width: 12px; height: 1px; background: rgba(0,0,0,0.3);
+            box-shadow: 0 3px 0 rgba(0,0,0,0.3), 0 6px 0 rgba(0,0,0,0.3);
         }
 
-        /* Robot Legs */
+        /* Detailed Legs */
         .robot-legs {
-            display: flex; justify-content: center; gap: 15px;
-            margin-top: 5px;
+            display: flex; justify-content: center; gap: 34px;
+            margin-top: -5px;
         }
         .robot-leg {
-            width: 30px; height: 40px;
-            background: linear-gradient(to bottom, #1a3060, #0d1e3a);
-            border: 1px solid rgba(0,245,255,0.35);
-            border-radius: 6px;
-            position: relative;
+            display: flex; flex-direction: column; align-items: center;
         }
-        .robot-foot {
-            width: 38px; height: 14px;
-            background: linear-gradient(to right, #1a3060, #0d1e3a);
-            border: 1px solid rgba(0,245,255,0.3);
-            border-radius: 4px;
-            position: absolute;
-            bottom: -12px;
-            left: -4px;
+        .leg-thigh {
+            width: 26px; height: 45px;
+            background: linear-gradient(to bottom, #1a3060, #0d1e3a);
+            border: 1px solid rgba(0,245,255,0.4);
+            border-radius: 6px;
+        }
+        .leg-knee {
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--c-bg2); border: 1px solid var(--c-cyan);
+            margin-top: -6px; margin-bottom: -6px; z-index: 1;
+            box-shadow: 0 0 10px rgba(0,245,255,0.3);
+        }
+        .leg-calf {
+            width: 22px; height: 40px;
+            background: linear-gradient(to bottom, #1a3060, #0d1e3a);
+            border: 1px solid rgba(0,245,255,0.4);
+            border-radius: 6px;
+        }
+        .leg-foot {
+            width: 36px; height: 14px;
+            background: linear-gradient(to right, #1a3060, var(--c-cyan));
+            border-radius: 4px 12px 4px 4px;
+            margin-top: -2px;
+            box-shadow: 0 5px 20px rgba(0,245,255,0.4);
+            border-bottom: 2px solid var(--c-cyan);
         }
 
         /* Speech bubble / ring waves */
@@ -579,8 +638,69 @@
         .robot-unit.speaking .robot-body { border-color: rgba(0,255,136,0.6); box-shadow: 0 0 30px rgba(0,255,136,0.3); }
         .robot-unit.speaking .antenna-ball { background: var(--c-green); animation: antennaPulse 0.4s ease-in-out infinite; }
         .robot-unit.speaking .chest-led { animation: chestLed 0.3s ease-in-out infinite !important; }
+        
+        .robot-unit.speaking {
+            animation: robotDance 0.5s ease-in-out infinite !important;
+        }
+        .robot-unit.speaking .robot-arm.left { animation: armDanceLeft 0.5s ease-in-out infinite alternate; transform-origin: top center; }
+        .robot-unit.speaking .robot-arm.right { animation: armDanceRight 0.5s ease-in-out infinite alternate; transform-origin: top center; }
 
-        /* ===== RIGHT: CHAT PANEL ===== */
+        @keyframes robotDance {
+            0%, 100% { transform: translateY(-8px) rotate(0); }
+            25% { transform: translateY(-12px) rotate(1.5deg); }
+            75% { transform: translateY(-12px) rotate(-1.5deg); }
+        }
+        @keyframes armDanceLeft { from { transform: rotate(-10deg); } to { transform: rotate(20deg); } }
+        @keyframes armDanceRight { from { transform: rotate(10deg); } to { transform: rotate(-20deg); } }
+
+        /* LOVE STATE (New) */
+        .robot-unit.love { animation: robotHeartbeat 0.8s ease-in-out infinite; }
+        @keyframes robotHeartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .robot-unit.love .robot-eye { background: #ff4d94; box-shadow: 0 0 30px #ff4d94; }
+        .robot-unit.love .robot-eye::after { content: '❤️'; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 14px; animation: heartFloat 1s ease-out infinite; }
+        @keyframes heartFloat { 0% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(-20px); } }
+        .robot-unit.love .robot-body { border-color: #ff4d94; box-shadow: 0 0 30px rgba(255, 77, 148, 0.4); }
+        .robot-unit.love .chest-led { background: #ff4d94 !important; box-shadow: 0 0 10px #ff4d94 !important; }
+        .robot-unit.love .antenna-ball { background: #ff4d94; box-shadow: 0 0 20px #ff4d94; }
+
+        /* JOY STATE (Reaction) */
+        .robot-unit.joy { animation: robotBounce 0.4s ease-in-out infinite; }
+        @keyframes robotBounce { 0%, 100% { transform: translateY(0) scale(1.02); } 50% { transform: translateY(-15px) scale(0.98); } }
+        .robot-unit.joy .robot-eye { background: var(--c-pink); box-shadow: 0 0 25px var(--c-pink); }
+        .robot-unit.joy .robot-arm.left { animation: armWave 0.3s ease-in-out infinite alternate; }
+        .robot-unit.joy .robot-arm.right { animation: armWave 0.3s ease-in-out infinite alternate-reverse; }
+        @keyframes armWave { from { transform: rotate(-30deg); } to { transform: rotate(30deg); } }
+
+        /* WALKING MOTION for legs */
+        .robot-unit:not(.speaking) .robot-legs { animation: robotWalk 2s ease-in-out infinite; }
+        @keyframes robotWalk {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        .robot-unit .robot-leg.left { animation: legSwing 2s ease-in-out infinite; }
+        .robot-unit .robot-leg.right { animation: legSwing 2s ease-in-out infinite reverse; }
+        @keyframes legSwing {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        /* SURPRISE STATE */
+        .robot-unit.surprise .robot-eye { transform: scale(1.5); background: var(--c-gold); box-shadow: 0 0 30px var(--c-gold); }
+        .robot-unit.surprise .robot-mouth { height: 35px; border-radius: 50%; width: 40px; }
+        
+        /* Speaking State Overrides */
+        .robot-unit.speaking .robot-arm.left { animation: armSpeakLeft 0.6s ease-in-out infinite alternate; }
+        .robot-unit.speaking .robot-arm.right { animation: armSpeakRight 0.6s ease-in-out infinite alternate; }
+        @keyframes armSpeakLeft { from { transform: rotate(-15deg); } to { transform: rotate(45deg); } }
+        @keyframes armSpeakRight { from { transform: rotate(15deg); } to { transform: rotate(-45deg); } }
+
+        /* Breathing effect for idle */
+        .robot-unit:not(.speaking):not(.thinking):not(.joy) .robot-body {
+            animation: breathe 3s ease-in-out infinite;
+        }
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); opacity: 0.9; } }
+
+        /* Right: Chat Panel */
         .chat-panel {
             display: flex; flex-direction: column;
             background: rgba(5,12,25,0.7);
@@ -659,6 +779,41 @@
             color: #e0d0ff;
             border-top-right-radius: 4px;
         }
+
+        /* Markdown Styles */
+        .msg-content { white-space: normal; word-wrap: break-word; }
+        .msg-content p { margin-bottom: 12px; line-height: 1.6; }
+        .msg-content p:last-child { margin-bottom: 0; }
+        .msg-content ul, .msg-content ol { margin-left: 20px; margin-bottom: 12px; }
+        .msg-content li { margin-bottom: 6px; }
+        .msg-content strong { color: var(--c-cyan); font-weight: 700; }
+        .msg-content pre {
+            background: #000;
+            padding: 12px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border: 1px solid rgba(0,245,255,0.3);
+            font-family: var(--font-code);
+            font-size: 0.85rem;
+            box-shadow: inset 0 0 20px rgba(0,0,0,1);
+        }
+        .msg-content code {
+            font-family: var(--font-code);
+            background: rgba(0,245,255,0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--c-cyan);
+            font-size: 0.9em;
+        }
+        .msg-content pre code {
+            background: none;
+            padding: 0;
+            color: #d0e0ff;
+            display: block;
+            line-height: 1.5;
+        }
+
         .msg-time { font-size: 0.65rem; color: rgba(255,255,255,0.3); margin-top: 5px; font-family: var(--font-code); display: block; }
 
         /* Typing indicator */
@@ -882,8 +1037,10 @@
                     <div class="robot-ear left"><div class="ear-light"></div></div>
                     <div class="robot-ear right"><div class="ear-light"></div></div>
                     <div class="robot-eyes">
+                        <div class="cheek left"></div>
                         <div class="robot-eye left-eye"><div class="pupil"></div></div>
                         <div class="robot-eye right-eye"><div class="pupil"></div></div>
+                        <div class="cheek right"></div>
                     </div>
                     <div class="robot-nose"></div>
                     <div class="robot-mouth" id="robot-mouth">
@@ -896,10 +1053,24 @@
 
                 <!-- Body -->
                 <div class="robot-body" style="position:relative;">
+                    <!-- Detailed Arms -->
                     <div class="robot-arms">
-                        <div class="robot-arm"><div class="arm-joint"></div></div>
-                        <div class="robot-arm"><div class="arm-joint"></div></div>
+                        <div class="robot-arm left">
+                            <div class="arm-shoulder"></div>
+                            <div class="arm-upper"></div>
+                            <div class="arm-elbow"></div>
+                            <div class="arm-lower"></div>
+                            <div class="arm-hand"></div>
+                        </div>
+                        <div class="robot-arm right">
+                            <div class="arm-shoulder"></div>
+                            <div class="arm-upper"></div>
+                            <div class="arm-elbow"></div>
+                            <div class="arm-lower"></div>
+                            <div class="arm-hand"></div>
+                        </div>
                     </div>
+                    
                     <div class="chest-panel">
                         <div class="chest-led"></div>
                         <div class="chest-led"></div>
@@ -910,10 +1081,20 @@
                     </div>
                 </div>
 
-                <!-- Legs -->
+                <!-- Detailed Legs -->
                 <div class="robot-legs">
-                    <div class="robot-leg"><div class="robot-foot"></div></div>
-                    <div class="robot-leg"><div class="robot-foot"></div></div>
+                    <div class="robot-leg left">
+                        <div class="leg-thigh"></div>
+                        <div class="leg-knee"></div>
+                        <div class="leg-calf"></div>
+                        <div class="leg-foot"></div>
+                    </div>
+                    <div class="robot-leg right">
+                        <div class="leg-thigh"></div>
+                        <div class="leg-knee"></div>
+                        <div class="leg-calf"></div>
+                        <div class="leg-foot"></div>
+                    </div>
                 </div>
             </div>
 
@@ -968,6 +1149,7 @@
     </main>
 </div>
 
-<script src="/static/assistant/js/main.js?v=4.6"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/static/assistant/js/main.js?v=4.8"></script>
 </body>
 </html>

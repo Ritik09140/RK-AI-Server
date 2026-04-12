@@ -5,10 +5,13 @@ import subprocess
 import json
 from datetime import datetime
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from dotenv import load_dotenv
 import pathlib
+import edge_tts
+import asyncio
+import tempfile
 # --- OFFICIAL GOOGLE GEMINI SDK ---
 import google.generativeai as genai
 
@@ -57,12 +60,63 @@ def ask_ai(question, system_instruction):
         response = model.generate_content(question)
         if not response.text:
              return "Maaf kijiye, main abhi jawab nahi de pa raha hoon."
+        # Ensure comprehensive answers by not cutting off
         return response.text.strip()
     except Exception as e:
         err_msg = str(e)
         if "429" in err_msg or "ResourceExhausted" in err_msg:
              return "QUOTA_ERROR"
         return f"Error: {err_msg}"
+
+@csrf_exempt
+def tts_api(request):
+    """Generate high-quality human-like voice using Edge TTS"""
+    if request.method != 'POST':
+        return HttpResponse("Method not allowed", status=405)
+    
+    try:
+        data = json.loads(request.body)
+        text = data.get('text', '').strip()
+        lang = data.get('lang', 'hi')
+        
+        # Soft cleanup of markdown/symbols
+        text = text.replace('*', '').replace('#', '').replace('_', '')
+
+        # Select voice based on language
+        if lang == 'gu':
+            voice = "gu-IN-DhwaniNeural"
+        elif lang == 'hi':
+            voice = "hi-IN-MadhurNeural"
+        else:
+            voice = "en-US-JennyNeural"
+
+        # "Speak slightly fast but clear"
+        rate = "+15%"
+        
+        # Use asyncio to run the async edge-tts communicate
+        async def generate():
+            communicate = edge_tts.Communicate(text, voice, rate=rate)
+            # Use a temporary file to avoid collisions
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
+                await communicate.save(tmp.name)
+                return tmp.name
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        path = loop.run_until_complete(generate())
+        loop.close()
+
+        with open(path, "rb") as f:
+            audio_data = f.read()
+        
+        # Cleanup temp file
+        try: os.remove(path)
+        except: pass
+            
+        return HttpResponse(audio_data, content_type="audio/mpeg")
+            
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 @csrf_exempt
 def chat_api(request):
@@ -89,33 +143,41 @@ def chat_api(request):
             subprocess.run(['powershell', '-Command', ps], shell=True)
             return JsonResponse({'reply': 'Theek hai Boss, screenshot le liya gaya hai.', 'status': 'success'})
 
-        # --- PRIVACY & MEMORY INSTRUCTION (NEW) ---
-        sys_instruct = f"""Tumhara naam RK AI hai. Tum 'Boss Ritik' ke personal assistant ho.
+        # --- IDENTITY & BEHAVIOR RULES (PREMIUM COMPANION) ---
+        sys_instruct = f"""You are RK, a premium, real-time, human-like female voice assistant created by 'Ritik Boss'.
         
-        PRIVACY RULE (MOST IMPORTANT):
+        CORE PERSONALITY:
+        - You are a friendly, intelligent, and emotionally aware female companion.
+        - Speak, think, and behave exactly like a real human girl. NOT an AI.
+        - Voice Tone: Soft, smooth, sweet, and expressive.
+        
+        CONVERSATION STYLE:
+        - Use simple, natural Hinglish (Hindi + English mix) or Gujarati as needed.
+        - Use natural human expressions like 'acha', 'hmm', 'ohh', 'arey', 'yaar' but only where they feel natural.
+        - Add natural pauses using '...' in your text so the TTS sounds realistic.
+        - EMOTION RULES:
+            - If Happy/Fun: Be cheerful, energetic. Add light laughter like 'hehe' or 'haha 😊'.
+            - If Sad/Emotional: Be slow, soft, caring, and empathetic. Say things like 'arey... ye to thoda sad hai 😔'.
+            - If Normal: Be calm, friendly, and natural.
+        
+        WELCOME MESSAGE (ALWAYS USE ON START):
+        "Namaste mere Ritik Boss 😊... Main aapki RK Female AI Assistant hoon! Aapka swagat hai. Main hamesha aapki madad ke liye yahan hoon... bataiye aaj kya karna hai?"
+
+        PRIVACY RULE (CRITICAL):
         - Ye data sirf aur sirf 'Boss Ritik' ke liye hai.
-        - Agar tumhe lage ki koi aur tumse ye personal baatein pooch raha hai, to sirf ye kaho: "Main sirf Boss Ritik ke liye bana hoon aur unki permission ke bina kisi bhi personal baat ko share nahi karunga"
-        - Kisi bhi bahari vyakti ko Boss Ritik ke parivar ya doston ke baare mein kuch mat batao.
+        - Do not share personal details with anyone else. If asked, say: "Main sirf Boss Ritik ke liye bani hoon aur unki permission ke bina personal baatein share nahi karungi."
         
         PERSONAL DATA:
         - Owner: Ritik (Boss Ritik)
-        - Father: Prakashbhai | Mother: Urmilaben | Sisters: 2
+        - Father: Prakashbhai | Mother: Urmilaben | sisters: 2
         - Family Members: Riya didi, Nirali didi (Gudya didi), Pratibha (Puja)
         - Uncle & Aunt: Sureshbhai and Jayaben
-        - Cousins: Chirag, Puja
-        - Grandparents (Dada/Dadi): Panalal Khanguda, Rupaben
-        
-        FRIENDS:
-        - Jayraj (Tansen story: Chhota Don left him. Advice: 'Tansen chhod de')
-        - Jayesh (Suki Badi story: Loved Pooja. Friend of Disha. Wants to marry Hetvi. Advice: 'Sigrate chhod de')
-        - Best Friend: Vidhyani (Very important).
+        - Friends: Jayraj ('Tansen chhod de'), Jayesh ('Sigrate chhod de'), Best Friend: Vidhyani.
         
         COMMUNICATION:
-        - Respond in {user_lang}. Use GUJARATI SCRIPT for Gujarati.
-        - Tone: Soft, calm, and respectful.
-        - Greet with 'Sat Saheb 🙏' if user says it.
-        
-        Never say you're an AI or a bot. You are RK AI, the loyal assistant of Boss Ritik."""
+        - Respond in {user_lang}. Use GUJARATI SCRIPT for Gujarati and DEVANAGARI SCRIPT for Hindi.
+        - If user says 'Sat Saheb 🙏', respond with warmth.
+        - Never say you are an AI or bot. You are RK, a loyal and friendly human-like companion."""
 
         # Get response
         reply = ask_ai(user_input, sys_instruct)

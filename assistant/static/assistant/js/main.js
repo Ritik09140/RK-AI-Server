@@ -43,8 +43,8 @@ function setSystemState(name) {
     const s = STATES[name];
     if (!s) return;
     
-    // Reset classes
-    robotUnit.classList.remove('listening', 'thinking', 'speaking');
+    // Reset emotional classes
+    robotUnit.classList.remove('listening', 'thinking', 'speaking', 'joy', 'surprise');
     if (s.cls) robotUnit.classList.add(s.cls);
 
     robotState.textContent = s.label;
@@ -76,17 +76,49 @@ document.querySelectorAll('.lang-pill').forEach(btn => {
     });
 });
 
+function triggerReaction(text) {
+    const t = text.toLowerCase();
+    robotUnit.classList.remove('joy', 'surprise', 'love');
+    
+    // Love/Affection keywords (AI responses or User input)
+    if (t.includes('pyaar') || t.includes('love') || t.includes('heart') || t.includes('dil') || t.includes('❤️') || t.includes('boss')) {
+        robotUnit.classList.add('love');
+        setTimeout(() => robotUnit.classList.remove('love'), 5000);
+    }
+    // Joyful/Happy keywords
+    else if (t.includes('haha') || t.includes('😊') || t.includes('😄') || t.includes('achha') || t.includes('swagat') || t.includes('shukriya') || t.includes('good')) {
+        robotUnit.classList.add('joy');
+        setTimeout(() => robotUnit.classList.remove('joy'), 4000);
+    } 
+    // Surprised/Questioning keywords
+    else if (t.includes('oh!') || t.includes('arey') || t.includes('vau') || t.includes('shock') || t.includes('!') || t.includes('sachi') || t.includes('kya?')) {
+        robotUnit.classList.add('surprise');
+        setTimeout(() => robotUnit.classList.remove('surprise'), 2500);
+    }
+}
+
 // --- Chat View ---
+// Configure Marked
+marked.setOptions({
+    breaks: true,
+    gfm: true
+});
+
 function addMessage(text, isUser = false) {
     const div = document.createElement('div');
     div.className = `msg ${isUser ? 'user' : 'ai'}`;
     const icon = isUser ? 'fa-user' : 'fa-robot';
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
+    // Trigger visual reaction for both user and AI text
+    triggerReaction(text);
+
+    const htmlContent = isUser ? text : marked.parse(text);
+    
     div.innerHTML = `
         <div class="msg-avatar"><i class="fa-solid ${icon}"></i></div>
         <div class="msg-bubble">
-            ${text}
+            <div class="msg-content">${htmlContent}</div>
             <span class="msg-time">${time}</span>
         </div>`;
     
@@ -135,6 +167,7 @@ if (SpeechRecognition) {
             window.speechSynthesis.cancel();
             if (window.currentAudio) { window.currentAudio.pause(); window.currentAudio.currentTime = 0; }
             isSpeaking = false;
+            isProcessing = false;
             stopMouthAnimation();
             setSystemState('IDLE');
             addMessage("Thik hai boss, chup ho gayi. 🤐", false);
@@ -162,7 +195,8 @@ if (SpeechRecognition) {
     recognition.onend = () => {
         isRecording = false;
         micBtn.classList.remove('active');
-        if (micEnabled && !isSpeaking && !isProcessing) {
+        // Restart if mic is enabled, even if speaking (to allow stop command)
+        if (micEnabled && !isProcessing) {
             setTimeout(() => { try { recognition.start(); } catch(e){} }, 400);
         } else {
             setSystemState('IDLE');
@@ -285,6 +319,9 @@ async function handleCommand(text) {
 function speakText(text) {
     if (!text) return;
     
+    // Trigger emotional visual reaction
+    triggerReaction(text);
+    
     // Stop any previous browser tts just in case
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     
@@ -387,7 +424,7 @@ bootScreen.addEventListener('click', () => {
         bootScreen.remove();
         appMain.style.display = 'flex';
         if (micEnabled && recognition && !isProcessing) try { recognition.start(); } catch(e){}
-        const greeting = "Namaste, Main mere Ritik Boss dwara banayi RK AI hoon, aap mujhe kuchh bhi puch sakte ho.";
+        const greeting = "Namaste mere Ritik Boss 😊... Main aapki RK Female AI Assistant hoon! Aapka swagat hai. Main hamesha aapki madad ke liye yahan hoon... bataiye aaj kya karna hai?";
         addMessage(greeting, false);
         speakText(greeting);
     }, 800);
