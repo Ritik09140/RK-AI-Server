@@ -141,7 +141,7 @@ def ai_brain(user_msg: str, history: list) -> str:
     # Explicit check: If Render env is missing or empty, use our hardcoded backup
     google_api_key = os.getenv("GEMINI_API_KEY")
     if not google_api_key or len(google_api_key) < 10:
-        google_api_key = "AIzaSyCav4UnAP1s2AJKIvOwx0W-Lx5O3MjEIvA" 
+        google_api_key = "AIzaSyCtE9jSBIwzvpQu7MPU0QSvx212bEa6TTE" 
     
     openai_api_key = os.getenv("OPENAI_API_KEY")
     openrouter_api_key = os.getenv("OPENROUTER_API_KEY")

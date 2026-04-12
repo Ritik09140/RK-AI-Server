@@ -9,7 +9,7 @@ load_dotenv()
 class RKBrain:
     def __init__(self, memory_file="memory.json"):
         val = os.getenv("GEMINI_API_KEY")
-        self.api_key = val if val and len(val) > 10 else "AIzaSyCav4UnAP1s2AJKIvOwx0W-Lx5O3MjEIvA"
+        self.api_key = val if val and len(val) > 10 else "AIzaSyCtE9jSBIwzvpQu7MPU0QSvx212bEa6TTE"
         self.memory_file = memory_file
         self.personality_prompt = (
             "You are RK, a beautiful and smart female robot assistant with a beating heart, created by Ritik Boss. "
