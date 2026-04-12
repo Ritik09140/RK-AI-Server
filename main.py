@@ -151,6 +151,8 @@ def ai_brain(user_msg: str, history: list) -> str:
     messages.extend(history[-20:]) 
     messages.append({"role": "user", "content": user_msg})
 
+    last_error = "All providers failed (Gemini, OpenAI, OpenRouter)."
+    
     # ── Layer 1: Google Gemini (Primary) ──────────────────────
     try:
         if google_api_key:
@@ -167,51 +169,58 @@ def ai_brain(user_msg: str, history: list) -> str:
             }
             
             # Smart Multi-Model Retry (Try 2.0 then 1.5 variants)
-            model_variants = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"]
+            model_variants = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-2.0-flash", "gemini-1.5-pro"]
             
             for model_name in model_variants:
                 url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={google_api_key}"
                 try:
-                    resp = http_requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=25)
+                    resp = http_requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=20)
                     if resp.status_code == 200:
                         result = resp.json()
                         if "candidates" in result:
                             return result["candidates"][0]["content"]["parts"][0]["text"].strip()
-                    log.warning(f"Model {model_name} failed (Status {resp.status_code}). Trying next...")
-                except:
+                    last_error = f"Gemini ({model_name}): {resp.status_code} - {resp.text[:100]}"
+                    log.warning(last_error)
+                except Exception as e:
+                    last_error = f"Gemini ({model_name}) Exception: {str(e)}"
                     continue
     except Exception as e:
-        log.error(f"Gemini exception: {e}")
+        log.error(f"Gemini exception overall: {e}")
 
     # ── Layer 2: OpenAI GPT-4o-mini (Fallback 1) ─────────────
-    try:
-        if openai_api_key:
+    if openai_api_key:
+        try:
             resp = http_requests.post(
                 "https://api.openai.com/v1/chat/completions",
                 headers={"Authorization": f"Bearer {openai_api_key}", "Content-Type": "application/json"},
                 json={"model": "gpt-4o-mini", "messages": messages, "temperature": 0.8},
-                timeout=25,
+                timeout=20,
             )
-            result = resp.json()
-            if "choices" in result:
+            if resp.status_code == 200:
+                result = resp.json()
                 return result["choices"][0]["message"]["content"].strip()
-    except: pass
+            last_error = f"OpenAI: {resp.status_code}"
+        except Exception as e:
+            last_error = f"OpenAI Exception: {str(e)}"
 
     # ── Layer 3: OpenRouter (Fallback 2) ──────────────────────
-    try:
-        if openrouter_api_key:
+    if openrouter_api_key:
+        try:
             resp = http_requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={"Authorization": f"Bearer {openrouter_api_key}", "Content-Type": "application/json"},
                 json={"model": "google/gemini-2.0-flash-001", "messages": messages, "temperature": 0.8},
-                timeout=25,
+                timeout=20,
             )
-            result = resp.json()
-            if "choices" in result:
+            if resp.status_code == 200:
+                result = resp.json()
                 return result["choices"][0]["message"]["content"].strip()
-    except: pass
+            last_error = f"OpenRouter: {resp.status_code}"
+        except Exception as e:
+            last_error = f"OpenRouter Exception: {str(e)}"
 
-    return "Kuch problem hui boss, lagta hai meri API keys (Gemini/OpenAI) ki limit exhaust ho gayi hai! 🔧"
+    return f"Kuch problem hui boss! Sabhi API keys fail ho gayi hain. 🔧\n\n**Technical Error:** {last_error}"
+
 
 
 # ─── Main Endpoints ─────────────────────────────────────────────
