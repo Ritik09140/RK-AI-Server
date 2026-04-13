@@ -13,7 +13,7 @@ load_dotenv(BASE.parent / ".env")
 
 GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
 OPENAI_KEY = os.getenv("OPENAI_API_KEY", "")
-OR_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OR_KEY = "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"
 _mem,_names={},{}
 def get_hist(sid):
     if sid not in _mem:_mem[sid]=deque(maxlen=10)
@@ -122,13 +122,54 @@ def smart_reply(msg,lang):
     if any(w in t for w in ["kahani","story","kissa","sunao"]) or "कहानी" in raw:
         return "Boss, ek kahani! Ek ladka tha jo roz sapne dekhta tha. Log kehte nahi hoga. Lekin usne haar nahi maani, mehnat ki aur ek din safal ho gaya! Moral: Sapne dekho aur mehnat karo!"
     topics={"python":"Python ek powerful programming language hai jo AI, web development aur automation mein use hoti hai!","java":"Java ek object-oriented language hai. Android apps aur enterprise software mein widely use hota hai.","javascript":"JavaScript web ka king hai! Websites ko interactive banata hai. React, Node.js — JS har jagah hai!","operating system":"Operating system ek system software hai jo computer hardware ko manage karta hai. Windows, Linux, macOS popular OS hain.","artificial intelligence":"AI machines ko intelligent banata hai! Machine Learning, Deep Learning, NLP — sab AI ke parts hain.","machine learning":"Machine Learning AI ka dil hai! Computers data se khud seekhte hain.","computer":"Computer ek electronic device hai jo data process karta hai. CPU, RAM, Storage main components hain.","internet":"Internet ek global network hai! WWW, email, social media — sab internet pe hai.","india":"India ek mahan desh hai! 1.4 billion logon ka desh, duniya ka sabse bada democracy!","cricket":"Cricket India ka dharam hai Boss! Virat Kohli, Rohit Sharma, MS Dhoni — legends!","health":"Sehat sabse badi daulat hai Boss! Regular exercise, balanced diet, poori neend — zaruri hain.","education":"Shiksha sabse powerful weapon hai! Yeh career, thinking aur life improve karti hai.","narendra modi":"Narendra Modi India ke 14ve Prime Minister hain. 2014 se PM hain. Gujarat ke CM bhi rahe hain. Development aur Digital India unka vision hai.","modi":"Narendra Modi India ke Prime Minister hain. BJP ke neta hain. India ko vishwa shakti banana unka sapna hai.","parul university":"Parul University Vadodara, Gujarat mein hai. Engineering, medical, management courses offer karti hai. Contact: 1800-123-5555.","vadodara":"Vadodara Gujarat ka ek important sheher hai. Baroda ke naam se bhi jaana jaata hai. Laxmi Vilas Palace famous hai.","gujarat":"Gujarat India ka vibrant state hai! Business capital, garba dance, dhokla — culture ke liye famous!","exam":"Exam tips Boss! Regular schedule banao, short notes likhte jao, previous papers solve karo. Pass zaroor hoge!","college":"College life amazing experience hai! Naye dost, naya knowledge, naye opportunities!","business":"Business mein risk aur reward dono hain! Achha idea + mehnat + patience = success!","money":"Paisa zaruri hai, lekin sab kuch nahi Boss! Mehnat karo, save karo, invest karo.","love":"Pyar ek khoobsurat ehsaas hai Boss! Yeh relationships ko mazboot banata hai.","life":"Zindagi ek anmol tohfa hai Boss! Ise khushi, mehnat aur pyar se jeena chahiye.","success":"Safalta ke liye clear goal set karo, mehnat karo, consistent raho, kabhi haar mat mano!","programming":"Programming computers ko instructions dene ki kala hai! Software, apps, websites — sab programming se banta hai.","game":"Gaming ek popular hobby hai! PUBG, Free Fire, GTA — popular games hain.","movie":"Movies ek art form hai Boss! Bollywood, Hollywood — entertainment ki duniya.","music":"Music soul ki bhasha hai! Mood improve karta hai, stress kam karta hai.","food":"Khana zindagi ka important hissa hai! Biryani, dal makhani, dosa — India mein kitne delicious dishes!"}
+    # Sat Saheb
+    if any(w in t for w in ["sat saheb","sat sahib","satsaheb"]) or "sat saheb" in raw.lower():
+        return "Sat Saheb Ji! Kabir Saheb ki jai! Aap kaise hain? Kya seva kar sakta hoon?"
+    # Rutvik - best friend
+    if "rutvik" in t:
+        return "Rutvik aapka sabse achha dost hai Boss! Woh bahut achha insaan hai. Unke baare mein aur kya jaanna chahte hain?"
+    # Family details
+    if any(w in t for w in ["papa","pita","father","bapu"]):
+        return "Aapke Papa ka naam Ritik ke ghar ke mukhiya hain. Woh bahut mehnat karte hain aur family ka dhyan rakhte hain."
+    if any(w in t for w in ["mummy","maa","mother","mata","mummy"]):
+        return "Aapki Mummy bahut pyaari hain! Ghar ki lakshmi hain woh. Unka aashirwad hamesha aapke saath hai."
+    if any(w in t for w in ["riya","riya didi"]):
+        return "Riya aapki family member hain. Bahut achhi hain woh!"
+    if any(w in t for w in ["gudiya","gudiya didi"]):
+        return "Gudiya Didi bahut pyaari hain! Family mein unka bahut important role hai."
+    if any(w in t for w in ["dada","dadi","dadaji","dadiji"]):
+        return "Dada-Dadi aapke ghar ke aadhar stambh hain! Unka aashirwad sabse keemti hai."
+    if any(w in t for w in ["kaka","kaki","chacha","chachi"]):
+        return "Kaka-Kaki bahut achhe hain! Family mein unka bahut pyaar hai."
+    if any(w in t for w in ["puja"]):
+        return "Puja family ki ek pyaari member hain!"
+    if any(w in t for w in ["chirag"]):
+        return "Chirag family ka ek important member hai!"
+    if any(w in t for w in ["kabir saheb","kabir sahib","sant kabir"]):
+        return "Kabir Saheb ek mahan sant the! Unke dohe aaj bhi logon ko raah dikhate hain. 'Dukh mein simran sab kare, sukh mein kare na koi.'"
+    if any(w in t for w in ["sant rampal","rampalji","rampal ji"]):
+        return "Sant Rampalji Maharaj ek mahan sant hain jo Kabir Saheb ke updesh ko aage badha rahe hain. Satlok Ashram unka main kendra hai."
     for key,ans in topics.items():
         if key in t:return ans
-    deva={"kem cho":"Hu saras chhu Boss! Tame kem cho? Hu tamari shu madad kari shakhu?","kem":"Hu saras chhu Boss! Tame kem cho?","kem chho":"Hu bilkul saras chhu Boss! Tame kem chho?","tane kone banayu":"Mane Ritik Boss e banavio chhe! Hu RK chhu, temno personal AI assistant.","kon chhe tu":"Hu RK chhu, Ritik Boss no personal AI assistant! Commands execute karu chhu ane prashno na jawab aaphu chhu.","shu kari shake":"Boss, hu YouTube/Google/WhatsApp/Chrome kholi shakhu, apps open/close, volume control, screenshot, time/date, shutdown/restart ane prashno na jawab aapi shakhu!","narendra modi":"Narendra Modi India na 14ma Prime Minister chhe. 2014 thi PM chhe. Gujarat na CM pan rahe chhe.","parul":"Parul University Vadodara, Gujarat ma chhe. Engineering, medical, management courses offer kare chhe.","कैसे हो":"Main bilkul theek hoon Boss! Aap kaise hain? Kya madad kar sakta hoon?","नरेंद्र मोदी":"Narendra Modi India ke 14ve Prime Minister hain. 2014 se PM hain. Gujarat ke CM bhi rahe hain.","मोदी":"Narendra Modi India ke Prime Minister hain. BJP ke neta hain.","पारुल":"Parul University Vadodara, Gujarat mein hai. Engineering, medical, management courses offer karti hai.","वडोदरा":"Vadodara Gujarat ka ek important sheher hai. Baroda ke naam se bhi jaana jaata hai."}
+    deva={"kem cho":"Hu saras chhu Boss! Tame kem cho? Hu tamari shu madad kari shakhu?","kem":"Hu saras chhu Boss! Tame kem cho?","kem chho":"Hu bilkul saras chhu Boss! Tame kem chho?","tane kone banayu":"Mane Ritik Boss e banavio chhe! Hu RK chhu, temno personal AI assistant.","kon chhe tu":"Hu RK chhu, Ritik Boss no personal AI assistant! Commands execute karu chhu ane prashno na jawab aaphu chhu.","shu kari shake":"Boss, hu YouTube/Google/WhatsApp/Chrome kholi shakhu, apps open/close, volume control, screenshot, time/date, shutdown/restart ane prashno na jawab aapi shakhu!","narendra modi":"Narendra Modi India na 14ma Prime Minister chhe. 2014 thi PM chhe. Gujarat na CM pan rahe chhe.","parul":"Parul University Vadodara, Gujarat ma chhe. Engineering, medical, management courses offer kare chhe.","sat saheb":"Sat Saheb Ji! Kabir Saheb ki jai!","rutvik":"Rutvik tamaro sabse achho dost chhe Boss!","कैसे हो":"Main bilkul theek hoon Boss! Aap kaise hain? Kya madad kar sakta hoon?","नरेंद्र मोदी":"Narendra Modi India ke 14ve Prime Minister hain. 2014 se PM hain. Gujarat ke CM bhi rahe hain.","मोदी":"Narendra Modi India ke Prime Minister hain. BJP ke neta hain.","पारुल":"Parul University Vadodara, Gujarat mein hai. Engineering, medical, management courses offer karti hai.","वडोदरा":"Vadodara Gujarat ka ek important sheher hai. Baroda ke naam se bhi jaana jaata hai.","sat saheb":"Sat Saheb Ji! Kabir Saheb ki jai! Aap kaise hain?"}
     for key,ans in deva.items():
         if key in raw.lower() or key in t:return ans
     return {"hi":f"Boss, samajh gaya! Kya aap aur detail mein bata sakte hain?","en":f"Boss, got it! Can you give more details?","gu":f"Boss, samji gayo! Thodu vahu detail aapi shako?","mr":f"Boss, samjalo! Thodi jast mahiti deu shakata ka?"}.get(lang,"Boss, samajh gaya! Kya aur detail mein bata sakte hain?")
 def run_cmd(t,raw,lang):
+    # Sat Saheb
+    if any(w in t for w in ["sat saheb","sat sahib","satsaheb"]):
+        return "Sat Saheb Ji! Kabir Saheb ki jai! Kya seva kar sakta hoon?","none",""
+    # Voice change
+    if any(w in t for w in ["change voice to female","ladki ki awaaz","female voice","girl voice","voice female"]):
+        return "Voice female kar di Boss!","set_voice_female",""
+    if any(w in t for w in ["change voice to male","ladka ki awaaz","male voice","boy voice","voice male"]):
+        return "Voice male kar di Boss!","set_voice_male",""
+    if any(w in t for w in ["slow bolo","slow voice","dheere bolo"]):
+        return "Ab dheere bolunga Boss!","set_speed_slow",""
+    if any(w in t for w in ["fast bolo","tez bolo","fast voice"]):
+        return "Ab tez bolunga Boss!","set_speed_fast",""
+    if any(w in t for w in ["normal speed","normal bolo","normal voice"]):
+        return "Normal speed pe aa gaya Boss!","set_speed_normal",""
     if any(w in t for w in ["gujarati me","gujarati mein","gujarati ma"]):return "Okay Boss! Hu havi Gujarati ma vaat karish!","set_lang_gu",""
     if any(w in t for w in ["marathi me","marathi mein","marathi madhe"]):return "Okay Boss! Aata mi Marathi madhe bolto!","set_lang_mr",""
     if any(w in t for w in ["hindi me","hindi mein","speak hindi"]):return "Okay Boss! Ab main Hindi mein bolunga!","set_lang_hi",""

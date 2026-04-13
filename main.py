@@ -9,14 +9,32 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 from datetime import datetime
-from dotenv import load_dotenv
 import edge_tts
 import io
 import asyncio
 from fastapi.responses import StreamingResponse
 
-load_dotenv()
+def manual_load_env():
+    env_path = os.path.join(os.path.dirname(__file__), '.env')
+    if os.path.exists(env_path):
+        with open(env_path, 'r') as f:
+            for line in f:
+                if '=' in line and not line.startswith('#'):
+                    parts = line.strip().split('=', 1)
+                    if len(parts) == 2:
+                        key = parts[0].strip()
+                        value = parts[1].strip()
+                        os.environ[key] = value
+
+# Guarantee env loading
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+manual_load_env()
 
 # ─── Logging ───────────────────────────────────────────────────
 logging.basicConfig(
@@ -30,6 +48,10 @@ log = logging.getLogger("rk_ai")
 app = FastAPI(title="RK AI", version="4.0")
 app.mount("/static", StaticFiles(directory="assistant/static"), name="static")
 templates = Jinja2Templates(directory="assistant/templates")
+
+# ─── Schema ───────────────────────────────────────────────────
+class ChatRequest(BaseModel):
+    message: str
 
 # ─── Memory (last 5 conversation pairs) ─────────────────────────
 MEMORY_FILE = "memory.json"
@@ -138,24 +160,21 @@ def normalize(text: str) -> str:
 import requests as http_requests
 
 def ai_brain(user_msg: str, history: list) -> str:
-    # Explicit check: If Render env is missing or empty, use our hardcoded backup
+    # Load API keys from .env
     google_api_key = os.getenv("GEMINI_API_KEY")
-    if not google_api_key or len(google_api_key) < 10:
-        google_api_key = "AIzaSyCtE9jSBIwzvpQu7MPU0QSvx212bEa6TTE" 
-    
     openai_api_key = os.getenv("OPENAI_API_KEY")
-    openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+    openrouter_api_key = "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"
 
     # Increased memory context
     messages = [{"role": "system", "content": PERSONALITY}]
     messages.extend(history[-20:]) 
     messages.append({"role": "user", "content": user_msg})
 
-    last_error = "All providers failed (Gemini, OpenAI, OpenRouter)."
+    all_errors = []
     
-    # ── Layer 1: Google Gemini (Primary) ──────────────────────
-    try:
-        if google_api_key:
+    # ── Layer 1: Google Gemini (Native API) ──────────────────────
+    if google_api_key:
+        try:
             gemini_history = []
             for m in messages:
                 role = "user" if m["role"] == "user" else "model"
@@ -168,7 +187,6 @@ def ai_brain(user_msg: str, history: list) -> str:
                 "generationConfig": {"temperature": 0.8}
             }
             
-            # Smart Multi-Model Retry (Try various versions and names)
             model_variants = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.0-flash", "gemini-1.5-pro"]
             api_versions = ["v1", "v1beta"]
             
@@ -176,52 +194,81 @@ def ai_brain(user_msg: str, history: list) -> str:
                 for model_name in model_variants:
                     url = f"https://generativelanguage.googleapis.com/{ver}/models/{model_name}:generateContent?key={google_api_key}"
                     try:
-                        resp = http_requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=15)
+                        resp = http_requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=10)
                         if resp.status_code == 200:
                             result = resp.json()
                             if "candidates" in result:
                                 return result["candidates"][0]["content"]["parts"][0]["text"].strip()
-                        last_error = f"Gemini ({ver}/{model_name}): {resp.status_code} - {resp.text[:80]}"
-                        log.warning(last_error)
-                    except Exception as e:
-                        last_error = f"Gemini ({ver}/{model_name}) Error: {str(e)[:50]}"
+                        all_errors.append(f"Gemini({ver}/{model_name}):{resp.status_code}")
+                    except Exception:
                         continue
-    except Exception as e:
-        log.error(f"Gemini exception overall: {e}")
+        except Exception as e:
+            all_errors.append(f"Gemini Error: {str(e)[:30]}")
 
-    # ── Layer 2: OpenAI GPT-4o-mini (Fallback 1) ─────────────
+    # ── Layer 2: OpenRouter (Robust Multi-Model) ──────────────────────
+    if openrouter_api_key:
+        models = [
+            "google/gemini-2.0-flash-001",
+            "meta-llama/llama-3.1-8b-instruct:free",
+            "mistralai/mistral-7b-instruct:free",
+            "microsoft/phi-3-mini-128k-instruct:free",
+            "google/gemma-2-9b-it:free",
+            "openchat/openchat-7b:free",
+            "gryphe/mythomist-7b:free"
+        ]
+        
+        for model in models:
+            try:
+                headers = {
+                    "Authorization": f"Bearer {openrouter_api_key}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "http://localhost:8001",
+                    "X-Title": "RK AI Assistant",
+                }
+                payload = {
+                    "model": model,
+                    "messages": messages,
+                    "temperature": 0.8
+                }
+                resp = http_requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=15,
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if "choices" in data and len(data["choices"]) > 0:
+                        return data["choices"][0]["message"]["content"].strip()
+                all_errors.append(f"OpenRouter({model.split('/')[-1]}):{resp.status_code}")
+            except Exception as e:
+                all_errors.append(f"OpenRouter({model.split('/')[-1]}):{str(e)[:15]}")
+                continue
+
+    # ── Layer 3: OpenAI (Final API Fallback) ─────────────
     if openai_api_key:
         try:
             resp = http_requests.post(
                 "https://api.openai.com/v1/chat/completions",
                 headers={"Authorization": f"Bearer {openai_api_key}", "Content-Type": "application/json"},
-                json={"model": "gpt-4o-mini", "messages": messages, "temperature": 0.8},
-                timeout=20,
+                json={"model": "gpt-4o-mini", "messages": messages},
+                timeout=10,
             )
             if resp.status_code == 200:
-                result = resp.json()
-                return result["choices"][0]["message"]["content"].strip()
-            last_error = f"OpenAI: {resp.status_code}"
-        except Exception as e:
-            last_error = f"OpenAI Exception: {str(e)}"
+                return resp.json()["choices"][0]["message"]["content"].strip()
+            all_errors.append(f"OpenAI:{resp.status_code}")
+        except:
+            all_errors.append("OpenAI:Timeout")
 
-    # ── Layer 3: OpenRouter (Fallback 2) ──────────────────────
-    if openrouter_api_key:
-        try:
-            resp = http_requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={"Authorization": f"Bearer {openrouter_api_key}", "Content-Type": "application/json"},
-                json={"model": "google/gemini-2.0-flash-001", "messages": messages, "temperature": 0.8},
-                timeout=20,
-            )
-            if resp.status_code == 200:
-                result = resp.json()
-                return result["choices"][0]["message"]["content"].strip()
-            last_error = f"OpenRouter: {resp.status_code}"
-        except Exception as e:
-            last_error = f"OpenRouter Exception: {str(e)}"
+    # ── Final Fallback ─────────────────────────────────────────
+    err_report = " | ".join(all_errors)
+    return (
+        f"Kuch problem hui boss! 🔧\n\n"
+        f"**Error Details:** {err_report}\n\n"
+        f"Boss, lagta hai meri saari API keys khatam ho gayi hain ya server down hai. "
+        f"Ek baar internet check kar lo ya nayi API key dal do please! 🙏"
+    )
 
-    return f"Kuch problem hui boss! Sabhi API keys fail ho gayi hain. 🔧\n\n**Technical Error:** {last_error}"
 
 
 
@@ -232,10 +279,9 @@ async def index(request: Request):
 
 
 @app.post("/api/chat/")
-async def chat_api(request: Request):
+async def chat_api(req: ChatRequest):
     try:
-        data = await request.json()
-        user_msg = data.get("message", "").strip()
+        user_msg = req.message.strip()
         if not user_msg:
             return JSONResponse({"reply": "Kuch bolo boss 😎", "action": "none", "url": ""})
 

@@ -16,9 +16,28 @@ import webbrowser
 from datetime import datetime
 from collections import deque
 
+def manual_load_env():
+    env_path = os.path.join(os.path.dirname(__file__), '.env')
+    if os.path.exists(env_path):
+        with open(env_path, 'r') as f:
+            for line in f:
+                if '=' in line and not line.startswith('#'):
+                    parts = line.strip().split('=', 1)
+                    if len(parts) == 2:
+                        key = parts[0].strip()
+                        value = parts[1].strip()
+                        os.environ[key] = value
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+manual_load_env()
+
 # ── Config ────────────────────────────────────────────────────────────────────
-OPENROUTER_KEY = "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"
-AI_MODEL = "meta-llama/llama-3.2-3b-instruct:free"
+OPENROUTER_KEY = "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"
+AI_MODEL = "google/gemini-2.0-flash-001"
 WAKE_WORD = "hey rk"
 ASSISTANT_NAME = "RK"
 CREATOR = "Ritik Boss"
@@ -82,8 +101,11 @@ def listen(timeout: int = 5, phrase_limit: int = 10) -> str | None:
 
 # ── AI Brain (OpenRouter) ─────────────────────────────────────────────────────
 def ask_ai(user_msg: str) -> str:
-    """Send message to AI with memory context."""
+    """Send message to AI with memory context and robust multi-model fallback."""
     global user_name
+    
+    if not OPENROUTER_KEY:
+        return "Boss, OpenRouter key missing in .env! 🔧"
 
     system_prompt = (
         f"You are {ASSISTANT_NAME}, a sweet and smart female AI assistant created by {CREATOR}. "
@@ -95,21 +117,21 @@ def ask_ai(user_msg: str) -> str:
     )
 
     messages = [{"role": "system", "content": system_prompt}]
-
-    # Add memory context
     for m in list(memory):
         messages.append({"role": m["role"], "content": m["content"]})
-
     messages.append({"role": "user", "content": user_msg})
 
-    # Try multiple free models
+    # High reliability model list
     models = [
-        "meta-llama/llama-3.2-3b-instruct:free",
+        "google/gemini-2.0-flash-001",
+        "meta-llama/llama-3.1-8b-instruct:free",
+        "mistralai/mistral-7b-instruct:free",
         "microsoft/phi-3-mini-128k-instruct:free",
         "google/gemma-2-9b-it:free",
-        "mistralai/mistral-7b-instruct:free",
+        "openchat/openchat-7b:free"
     ]
 
+    last_error = "Unknown"
     for model in models:
         try:
             response = requests.post(
@@ -118,28 +140,29 @@ def ask_ai(user_msg: str) -> str:
                     "Authorization": f"Bearer {OPENROUTER_KEY}",
                     "Content-Type": "application/json",
                     "HTTP-Referer": "http://localhost",
-                    "X-Title": "RK AI"
+                    "X-Title": "RK AI Desktop"
                 },
                 json={
                     "model": model,
                     "messages": messages,
-                    "max_tokens": 300,
+                    "max_tokens": 400,
                     "temperature": 0.8
                 },
                 timeout=15
             )
             if response.status_code == 200:
                 reply = response.json()["choices"][0]["message"]["content"].strip()
-                print(f"[AI:{model.split('/')[1][:12]}] {reply[:60]}")
                 # Save to memory
                 memory.append({"role": "user", "content": user_msg})
                 memory.append({"role": "assistant", "content": reply})
                 return reply
+            
+            last_error = f"Status {response.status_code}"
         except Exception as e:
-            print(f"[AI ERR] {e}")
+            last_error = str(e)
             continue
 
-    return "Boss, abhi AI se connect nahi ho pa raha. Thodi der baad try karo."
+    return f"Boss, system link down hai (Report: {last_error[:30]}). 🔧"
 
 # ── Command Engine ────────────────────────────────────────────────────────────
 def execute_command(text: str) -> str | None:
