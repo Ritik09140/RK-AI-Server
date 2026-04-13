@@ -163,7 +163,7 @@ def ai_brain(user_msg: str, history: list) -> str:
     # Load API keys from .env
     google_api_key = os.getenv("GEMINI_API_KEY")
     openai_api_key = os.getenv("OPENAI_API_KEY")
-    openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "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")
+    openrouter_api_key = "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"
 
     # Increased memory context
     messages = [{"role": "system", "content": PERSONALITY}]
