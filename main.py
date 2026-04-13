@@ -263,7 +263,7 @@ def ai_brain(user_msg: str, history: list) -> str:
     # ── Final Fallback ─────────────────────────────────────────
     err_report = " | ".join(all_errors)
     return (
-        f"Kuch problem hui boss! 🔧\n\n"
+        f"Kuch problem hui boss! Test102 🔧\n\n"
         f"**Error Details:** {err_report}\n\n"
         f"Boss, lagta hai meri saari API keys khatam ho gayi hain ya server down hai. "
         f"Ek baar internet check kar lo ya nayi API key dal do please! 🙏"
