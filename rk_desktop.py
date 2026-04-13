@@ -36,7 +36,7 @@ except ImportError:
 manual_load_env()
 
 # ── Config ────────────────────────────────────────────────────────────────────
-OPENROUTER_KEY = "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"
+OPENROUTER_KEY = "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"
 AI_MODEL = "google/gemini-2.0-flash-001"
 WAKE_WORD = "hey rk"
 ASSISTANT_NAME = "RK"
