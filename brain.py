@@ -25,7 +25,7 @@ manual_load_env()
 class RKBrain:
     def __init__(self, memory_file="memory.json"):
         # Load API key from .env (Hardcoded fallback for Render deployment)
-        self.api_key = "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"
+        self.api_key = "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"
         self.memory_file = memory_file
         self.personality_prompt = (
             "You are RK, a beautiful and smart female robot assistant with a beating heart, created by Ritik Boss. "
