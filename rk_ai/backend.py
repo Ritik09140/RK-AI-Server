@@ -13,7 +13,7 @@ load_dotenv(BASE.parent / ".env")
 
 GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
 OPENAI_KEY = os.getenv("OPENAI_API_KEY", "")
-OR_KEY = "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"
+OR_KEY = os.getenv("OPENROUTER_API_KEY", "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")
 _mem,_names={},{}
 def get_hist(sid):
     if sid not in _mem:_mem[sid]=deque(maxlen=10)
