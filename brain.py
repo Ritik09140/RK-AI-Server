@@ -79,7 +79,7 @@ class RKBrain:
                 url = "https://openrouter.ai/api/v1/chat/completions"
                 headers = { 
                     "Authorization": f"Bearer {self.api_key}",
-                    "HTTP-Referer": "http://localhost:8001",
+                    "HTTP-Referer": "https://rk-ai007.onrender.com",
                     "X-Title": "RK AI Brain",
                     "Content-Type": "application/json"
                 }

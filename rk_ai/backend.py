@@ -99,7 +99,7 @@ def ask_ai(user_msg,lang,history,uname=""):
     for model in ["meta-llama/llama-3.2-3b-instruct:free","microsoft/phi-3-mini-128k-instruct:free"]:
         try:
             body2=json.dumps({"model":model,"messages":msgs,"temperature":0.8}).encode()
-            req2=urllib.request.Request("https://openrouter.ai/api/v1/chat/completions",data=body2,headers={"Authorization":"Bearer "+OR_KEY,"Content-Type":"application/json","HTTP-Referer":"http://127.0.0.1:8001","X-Title":"RK AI"})
+            req2=urllib.request.Request("https://openrouter.ai/api/v1/chat/completions",data=body2,headers={"Authorization":"Bearer "+OR_KEY,"Content-Type":"application/json","HTTP-Referer":"https://rk-ai007.onrender.com","X-Title":"RK AI"})
             with urllib.request.urlopen(req2,timeout=12,context=ctx) as r:
                 d=json.loads(r.read().decode())
                 txt=d["choices"][0]["message"]["content"].strip()

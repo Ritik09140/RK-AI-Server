@@ -222,7 +222,7 @@ def ai_brain(user_msg: str, history: list) -> str:
                 headers = {
                     "Authorization": f"Bearer {openrouter_api_key}",
                     "Content-Type": "application/json",
-                    "HTTP-Referer": "http://localhost:8001",
+                    "HTTP-Referer": "https://rk-ai007.onrender.com",
                     "X-Title": "RK AI Assistant",
                 }
                 payload = {
